@@ -110,6 +110,11 @@ async function run() {
       const result = await usersData.find(query).toArray();
       res.send(result);
     });
+    app.get("/allVerifiedEmployWithHr", async (req, res) => {
+      const query = ({ $or: [{ verified: 'yes' }, { role: 'Hr' }]});
+      const result = await usersData.find(query).toArray();
+      res.send(result);
+    });
     app.patch("/employVerified", async (req, res) => {
       const id = req.body;
       const filter = { _id: new ObjectId(id) };
@@ -117,6 +122,18 @@ async function run() {
       const updateDoc = {
         $set: {
           verified: "yes",
+        },
+      };
+      const result = await usersData.updateOne(filter, updateDoc, options);
+      res.send(result);
+    });
+    app.patch("/makeHr", async (req, res) => {
+      const id = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          role: "Hr",
         },
       };
       const result = await usersData.updateOne(filter, updateDoc, options);
