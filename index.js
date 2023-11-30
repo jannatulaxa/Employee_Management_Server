@@ -11,7 +11,7 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET);
 //  <----------Middle ware --------->
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: ["http://localhost:5173","https://pay-roll-887ad.web.app","https://pay-roll-887ad.firebaseapp.com"],
 
     credentials: true,
   })
