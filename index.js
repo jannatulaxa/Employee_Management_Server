@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 5002;
+const stripe = require("stripe")(process.env.STRIPE_SECRET);
 
 //  <----------Middle ware --------->
 app.use(
@@ -88,6 +89,23 @@ async function run() {
       res.clearCookie("token", { maxAge: 0 }).send({ Cookie: "clear" });
     });
 
+    //<------------------Payments Info Database----------------->
+
+  
+  
+    app.post("/create-payment-intent", async (req, res) => {
+      const { price } = req.body;
+      const amount = parseInt(price * 100);
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: "usd",
+        payment_method_types: ["card"],
+      });
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
+    });
+
     //<------------------User Info Database----------------->
 
     app.post("/users", async (req, res) => {
@@ -105,13 +123,38 @@ async function run() {
       const result = await usersData.insertOne(user);
       res.send(result);
     });
+    app.get("/users", async (req, res) => {
+      const email = req.query.email;
+      console.log("Hitting By User", email);
+      const query = { email: email };
+      const result = await usersData.findOne(query);
+
+      res.send(result);
+    });
     app.get("/employ", async (req, res) => {
-      const query = { role: "Employe" };
+      const query = { role: "Employe", status: { $exists: false } };
       const result = await usersData.find(query).toArray();
       res.send(result);
     });
     app.get("/allVerifiedEmployWithHr", async (req, res) => {
-      const query = ({ $or: [{ verified: 'yes' }, { role: 'Hr' }]});
+      const query = { $or: [{ verified: "yes" }, { role: "Hr" }] };
+      const result = await usersData.find(query).toArray();
+      res.send(result);
+    });
+    app.get("/allEmploy", async (req, res) => {
+      const query = {
+        verified: "yes",
+        role: "Employe",
+        status: { $exists: false },
+      };
+      const result = await usersData.find(query).toArray();
+      res.send(result);
+    });
+    app.get("/allHR", async (req, res) => {
+      const query = {
+        role: "Hr",
+        status: { $exists: false },
+      };
       const result = await usersData.find(query).toArray();
       res.send(result);
     });
@@ -134,6 +177,18 @@ async function run() {
       const updateDoc = {
         $set: {
           role: "Hr",
+        },
+      };
+      const result = await usersData.updateOne(filter, updateDoc, options);
+      res.send(result);
+    });
+    app.patch("/fired", async (req, res) => {
+      const id = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          status: "fired",
         },
       };
       const result = await usersData.updateOne(filter, updateDoc, options);
