@@ -53,8 +53,7 @@ async function run() {
     // <--------------------- Collection in database -------------->
 
     const usersData = client.db("officeManagementDb").collection("usersInfo");
-    // const AboutUserData = client.db("ForumDb").collection("aboutUser");
-    // const postsData = client.db("ForumDb").collection("postsInfo");
+  
 
     //<------------------Verify Admin----------------->
 
