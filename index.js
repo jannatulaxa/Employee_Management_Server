@@ -9,13 +9,16 @@ const port = process.env.PORT || 5002;
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 
 //  <----------Middle ware --------->
-app.use(
-  cors({
-    origin: ["http://localhost:5173","https://pay-roll-887ad.web.app","https://pay-roll-887ad.firebaseapp.com"],
+app.use(cors({
+  origin: [
 
-    credentials: true,
-  })
-);
+    'http://localhost:5173',
+    'http://localhost:5174',
+    "https://management-employee.surge.sh",
+  
+  ],
+  credentials:true
+}))
 app.use(cookieParser());
 app.use(express.json());
 const verifyToken = (req, res, next) => {
